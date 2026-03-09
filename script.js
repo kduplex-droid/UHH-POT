@@ -246,3 +246,58 @@ function renderLeaderboard() {
 
 updateDisplay();
 setInterval(updateDisplay, 60000);
+
+function openResetPrompt() {
+    const password = prompt("Enter admin code:");
+
+    if (password === "UHH2026RESET") {
+        const confirmReset = confirm("Reset the whole site? This will delete all saved data.");
+
+        if (confirmReset) {
+            resetWholeSite();
+        }
+    } else if (password !== null) {
+        alert("Wrong admin code.");
+    }
+}
+
+function resetWholeSite() {
+    localStorage.removeItem("dailyClicks");
+    localStorage.removeItem("dailyGuesses");
+    localStorage.removeItem("dailyWinners");
+
+    dailyClicks = {};
+    dailyGuesses = {};
+    dailyWinners = {};
+
+    currentDayKey = getTodayKey();
+
+    dailyClicks[currentDayKey] = 0;
+    dailyGuesses[currentDayKey] = [];
+
+    saveData();
+    updateDisplay();
+
+    alert("The whole site has been reset.");
+}
+
+let resetKeyCount = 0;
+let lastResetKeyTime = 0;
+
+document.addEventListener("keydown", function(event) {
+    const now = Date.now();
+
+    if (event.shiftKey && event.key.toLowerCase() === "r") {
+        if (now - lastResetKeyTime > 2000) {
+            resetKeyCount = 0;
+        }
+
+        resetKeyCount++;
+        lastResetKeyTime = now;
+
+        if (resetKeyCount === 3) {
+            resetKeyCount = 0;
+            openResetPrompt();
+        }
+    }
+});
