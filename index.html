@@ -12,7 +12,6 @@
     <p class="subtitle">Guess today's clicks. Closest guess wins.</p>
 
     <div class="box">
-
         <h2>Today's Clicker</h2>
 
         <p><strong>Day:</strong> <span id="dayName"></span></p>
@@ -20,22 +19,20 @@
         <p id="guessStatus">Guesses are open</p>
 
         <div class="pot-area" id="potArea">
-
-            <button id="potButton" onclick="addClick()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
-                     id="pot"
-                     alt="Pot">
+            <button id="potButton" type="button" onclick="addClick()" aria-label="Click the pot">
+                <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
+                    id="pot"
+                    alt="Pot"
+                >
                 <div class="pot-icon">🖱</div>
             </button>
-
         </div>
 
         <p><strong>Today's Clicks:</strong> <span id="todayCount">0</span></p>
-
     </div>
 
     <div class="box">
-
         <h2>Enter a Guess</h2>
 
         <select id="playerName">
@@ -47,11 +44,10 @@
         </select>
 
         <input type="number" id="playerGuess" placeholder="Enter your guess">
-        <button onclick="saveGuess()">Save Guess</button>
+        <button type="button" onclick="saveGuess()">Save Guess</button>
 
         <h3>Today's Guesses</h3>
         <ul id="guessList"></ul>
-
     </div>
 
     <div class="box">
@@ -65,10 +61,11 @@
     </div>
 
     <div id="adminCorner" onclick="openResetPrompt()" title="Admin"></div>
-    <audio id="clickSound">
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b3c42.mp3?filename=click-124467.mp3" type="audio/mpeg">
-</audio>
-    <script src="script.js"></script>
 
+    <audio id="clickSound" preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b3c42.mp3?filename=click-124467.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
 </body>
 </html>
