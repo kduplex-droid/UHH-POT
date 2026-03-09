@@ -583,3 +583,21 @@ updateDayEndCountdown();
 setInterval(updateDisplay, 60000);
 setInterval(updateCountdown, 1000);
 setInterval(updateDayEndCountdown, 1000);
+
+function toggleMenu() {
+    const menu = document.getElementById("menuDropdown");
+    if (menu) {
+        menu.classList.toggle("show");
+    }
+}
+
+document.addEventListener("click", function (event) {
+    const menu = document.getElementById("menuDropdown");
+    const button = document.querySelector(".menu-button");
+
+    if (!menu || !button) return;
+
+    if (!menu.contains(event.target) && !button.contains(event.target)) {
+        menu.classList.remove("show");
+    }
+});
