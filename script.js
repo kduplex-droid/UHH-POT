@@ -96,17 +96,47 @@ function checkForNewDay() {
     }
 }
 
+function selectCharacter(name) {
+    document.querySelectorAll(".player-card").forEach(card => {
+        card.classList.remove("player-selected");
+    });
+
+    const selectedCard = document.getElementById("player-" + name);
+    if (selectedCard) {
+        selectedCard.classList.add("player-selected");
+    }
+
+    const playerSelect = document.getElementById("playerName");
+    if (playerSelect) {
+        playerSelect.value = name;
+    }
+}
+
+function clearCrowns() {
+    document.querySelectorAll(".crown").forEach(crown => {
+        crown.classList.remove("crown-show");
+    });
+}
+
 function updateWinnerHighlight() {
     document.querySelectorAll(".player-card").forEach(card => {
         card.classList.remove("winner-highlight");
     });
 
+    clearCrowns();
+
     const todayWinner = dailyWinners[currentDayKey];
 
     if (todayWinner && todayWinner.name && todayWinner.name !== "No guesses") {
         const winnerCard = document.getElementById("player-" + todayWinner.name);
+        const winnerCrown = document.getElementById("crown-" + todayWinner.name);
+
         if (winnerCard) {
             winnerCard.classList.add("winner-highlight");
+        }
+
+        if (winnerCrown) {
+            winnerCrown.classList.add("crown-show");
         }
     }
 }
@@ -244,6 +274,7 @@ function saveGuess() {
     const guessInput = document.getElementById("playerGuess");
 
     const name = nameSelect.value;
+    selectCharacter(name);
     const guess = parseInt(guessInput.value);
 
     if (!name || isNaN(guess)) {
@@ -387,6 +418,12 @@ document.addEventListener("keydown", function(event) {
             resetKeyCount = 0;
             openResetPrompt();
         }
+    }
+});
+
+document.getElementById("playerName").addEventListener("change", function () {
+    if (this.value) {
+        selectCharacter(this.value);
     }
 });
 
