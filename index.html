@@ -6,68 +6,60 @@
     <title>UHH Click Guess Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h1>UHH Click Guess Game</h1>
-<p class="subtitle">Guess today's clicks. Closest guess wins.</p>
+    <h1>UHH Click Guess Game</h1>
+    <p class="subtitle">Guess today's clicks. Closest guess wins.</p>
 
-<div class="box">
+    <div class="box">
 
-    <h2>Today's Clicker</h2>
+        <h2>Today's Clicker</h2>
 
-    <p><strong>Day:</strong> <span id="dayName"></span></p>
-    <p><strong>Date:</strong> <span id="todayDate"></span></p>
+        <p><strong>Day:</strong> <span id="dayName"></span></p>
+        <p><strong>Date:</strong> <span id="todayDate"></span></p>
+        <p id="guessStatus">Guesses are open</p>
 
-    <p id="guessStatus">Guesses are open</p>
+        <div class="pot-area" id="potArea">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
+                 id="pot"
+                 alt="Pot"
+                 onclick="addClick()">
+        </div>
 
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
-         id="pot"
-         alt="Pot"
-         onclick="addClick()">
+        <p><strong>Today's Clicks:</strong> <span id="todayCount">0</span></p>
 
-    <p><strong>Today's Clicks:</strong> <span id="todayCount">0</span></p>
+    </div>
 
-</div>
+    <div class="box">
 
-<div class="box">
+        <h2>Enter a Guess</h2>
 
-    <h2>Enter a Guess</h2>
+        <select id="playerName">
+            <option value="">Choose player</option>
+            <option value="Jay">Jay</option>
+            <option value="Lebo">Lebo</option>
+            <option value="Sam">Sam</option>
+            <option value="Kgothatso">Kgothatso</option>
+        </select>
 
-    <select id="playerName">
-        <option value="">Choose player</option>
-        <option value="Jay">Jay</option>
-        <option value="Lebo">Lebo</option>
-        <option value="Sam">Sam</option>
-        <option value="Kgothatso">Kgothatso</option>
-    </select>
+        <input type="number" id="playerGuess" placeholder="Enter your guess">
+        <button onclick="saveGuess()">Save Guess</button>
 
-    <input type="number" id="playerGuess" placeholder="Enter your guess">
+        <h3>Today's Guesses</h3>
+        <ul id="guessList"></ul>
 
-    <button onclick="saveGuess()">Save Guess</button>
+    </div>
 
-    <h3>Today's Guesses</h3>
-    <ul id="guessList"></ul>
+    <div class="box">
+        <h2>Daily Results</h2>
+        <ul id="dailyResults"></ul>
+    </div>
 
-</div>
+    <div class="box">
+        <h2>Top 4 Leaderboard</h2>
+        <ol id="leaderboard"></ol>
+    </div>
 
-<div class="box">
-
-    <h2>Daily Results</h2>
-
-    <ul id="dailyResults"></ul>
-
-</div>
-
-<div class="box">
-
-    <h2>Top 4 Leaderboard</h2>
-
-    <ol id="leaderboard"></ol>
-
-</div>
-
-<script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
