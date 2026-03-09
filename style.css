@@ -1,13 +1,13 @@
 body {
     font-family: Arial, sans-serif;
-    background: #f3efe8;
+    background: linear-gradient(180deg, #f3efe8, #e5d8c5);
     text-align: center;
     margin: 0;
     padding: 20px;
 }
 
 h1 {
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
 .subtitle {
@@ -16,53 +16,121 @@ h1 {
 }
 
 .box {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     width: 380px;
     margin: 20px auto;
     padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.pot-area {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 20px auto;
+    overflow: hidden;
 }
 
 #pot {
-    width: 180px;
+    width: 190px;
     cursor: pointer;
-    transition: transform 0.15s ease;
+    transition: transform 0.1s ease;
+    user-select: none;
 }
 
 #pot:active {
-    transform: scale(0.95);
+    transform: scale(0.94);
 }
 
-input {
+.pot-shake {
+    animation: potShake 0.25s ease;
+}
+
+@keyframes potShake {
+    0%   { transform: translateX(0) rotate(0deg); }
+    20%  { transform: translateX(-4px) rotate(-2deg); }
+    40%  { transform: translateX(4px) rotate(2deg); }
+    60%  { transform: translateX(-3px) rotate(-1deg); }
+    80%  { transform: translateX(3px) rotate(1deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+}
+
+.coin {
+    position: absolute;
+    top: 10px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffe68a, #f1c232 65%, #c99a00);
+    border: 2px solid #b8860b;
+    font-weight: bold;
+    color: #7a5200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: coinFall 0.9s ease-in forwards;
+    pointer-events: none;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes coinFall {
+    0% {
+        transform: translateY(-20px) scale(0.8) rotate(0deg);
+        opacity: 1;
+    }
+    70% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(160px) scale(1) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+input,
+select,
+button {
     display: block;
     width: 80%;
     margin: 10px auto;
     padding: 10px;
     font-size: 16px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+input,
+select {
+    border: 1px solid #ccc;
 }
 
 button {
-    padding: 10px 16px;
     border: none;
-    border-radius: 8px;
     background: #8b5e3c;
     color: white;
     cursor: pointer;
-    font-size: 15px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 button:hover {
-    opacity: 0.9;
+    opacity: 0.92;
 }
 
-ul {
-    list-style: none;
-    padding: 0;
+button:active {
+    transform: scale(0.97);
+}
+
+ul,
+ol {
+    text-align: left;
+    padding-left: 24px;
 }
 
 li {
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
+    margin-bottom: 8px;
+}
+
+#guessStatus {
+    font-weight: bold;
 }
