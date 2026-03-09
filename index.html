@@ -21,14 +21,14 @@
 
         <div class="pot-area" id="potArea">
 
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
-         id="pot"
-         alt="Pot"
-         onclick="addClick()">
+            <button id="potButton" onclick="addClick()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
+                     id="pot"
+                     alt="Pot">
+                <div class="pot-icon">🖱</div>
+            </button>
 
-    <div class="pot-icon">🖱</div>
-
-</div>
+        </div>
 
         <p><strong>Today's Clicks:</strong> <span id="todayCount">0</span></p>
 
@@ -63,7 +63,10 @@
         <h2>Top 4 Leaderboard</h2>
         <ol id="leaderboard"></ol>
     </div>
+
     <div id="adminCorner" onclick="openResetPrompt()" title="Admin"></div>
+
     <script src="script.js"></script>
+
 </body>
 </html>
