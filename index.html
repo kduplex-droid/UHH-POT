@@ -122,12 +122,22 @@
             <h2>Enter a Guess</h2>
 
             <select id="playerName">
-                <option value="">Choose player</option>
-                <option value="William">William</option>
-                <option value="Rylan">Rylan</option>
-                <option value="Nickeel">Nickeel</option>
-                <option value="Kgothatso">Kgothatso</option>
-            </select>
+    <option value="">Choose player</option>
+    <option value="William">William</option>
+    <option value="Rylan">Rylan</option>
+    <option value="Nickeel">Nickeel</option>
+    <option value="Kgothatso">Kgothatso</option>
+</select>
+
+<input type="number" id="playerGuess" placeholder="Enter your guess">
+
+<input type="password" id="playerPassword" placeholder="Enter current password">
+<input type="password" id="newPlayerPassword" placeholder="Create or change password">
+
+<button type="button" onclick="saveGuess()">Submit Guess</button>
+<button type="button" onclick="requestPasswordChange()">Request Password Change</button>
+
+<p class="password-note">First time using a character? Enter a new password in the second password box.</p>
 
             <input type="number" id="playerGuess" placeholder="Enter your guess">
 
