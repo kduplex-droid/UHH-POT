@@ -760,3 +760,9 @@ li {
         font-size: 24px;
     }
 }
+
+.password-note {
+    color: #fff1cb;
+    font-size: 14px;
+    margin-top: 8px;
+}
