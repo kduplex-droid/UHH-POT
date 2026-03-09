@@ -29,7 +29,13 @@ function saveData() {
 }
 
 function getCurrentGuessesLocked() {
-    return dailyClicks[currentDayKey] > 0;
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    const isAfterCutoff = hours > 9 || (hours === 9 && minutes >= 10);
+
+    return isAfterCutoff || dailyClicks[currentDayKey] > 0;
 }
 
 function autoClosePreviousDay(dayKey) {
@@ -98,9 +104,19 @@ function updateDisplay() {
     document.getElementById("todayCount").textContent = dailyClicks[currentDayKey];
 
     const guessStatus = document.getElementById("guessStatus");
-    guessStatus.textContent = getCurrentGuessesLocked()
-        ? "Guesses are locked"
-        : "Guesses are open";
+
+    if (dailyClicks[currentDayKey] > 0) {
+        guessStatus.textContent = "Guesses are locked because clicking has started";
+    } else {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const isAfterCutoff = hours > 9 || (hours === 9 && minutes >= 10);
+
+        guessStatus.textContent = isAfterCutoff
+            ? "Guesses are locked after 9:10 AM"
+            : "Guesses are open until 9:10 AM";
+    }
 
     renderGuesses();
     renderDailyResults();
@@ -162,7 +178,7 @@ function saveGuess() {
     checkForNewDay();
 
     if (getCurrentGuessesLocked()) {
-        alert("Guesses are locked for today because clicking has already started.");
+        alert("Guesses are locked. They close at 9:10 AM or when clicking starts.");
         return;
     }
 
