@@ -1,0 +1,17 @@
+body{
+    text-align:center;
+    font-family:Arial;
+}
+
+.container{
+    margin-top:100px;
+}
+
+#pot{
+    width:200px;
+    cursor:pointer;
+}
+
+#counter{
+    font-size:40px;
+}
