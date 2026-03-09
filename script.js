@@ -262,6 +262,32 @@ function addClick() {
     }
 }
 
+function reportMisclicks() {
+    checkForNewDay();
+
+    const misclickInput = document.getElementById("misclickAmount");
+    const misclicks = parseInt(misclickInput.value, 10);
+
+    if (isNaN(misclicks) || misclicks <= 0) {
+        alert("Enter a valid number of misclicks.");
+        return;
+    }
+
+    if (misclicks > dailyClicks[currentDayKey]) {
+        alert("Misclicks cannot be more than today's clicks.");
+        return;
+    }
+
+    dailyClicks[currentDayKey] -= misclicks;
+
+    saveData();
+    updateDisplay();
+
+    misclickInput.value = "";
+
+    alert(misclicks + " misclick(s) removed.");
+}
+
 function saveGuess() {
     checkForNewDay();
 
@@ -396,6 +422,11 @@ function resetWholeSite() {
     updateDisplay();
     updateCountdown();
     updateDayEndCountdown();
+
+    const misclickInput = document.getElementById("misclickAmount");
+    if (misclickInput) {
+        misclickInput.value = "";
+    }
 
     alert("The whole site has been reset.");
 }
