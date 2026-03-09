@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Play - UHH Terraria Click Guess Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="sky">
+        <div class="sun"></div>
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+    </div>
+
+    <div class="game-wrapper">
+
+        <header class="title-box">
+            <h1>HOW TO PLAY</h1>
+            <p class="subtitle">Rules and guide for the UHH Terraria Click Guess Game</p>
+
+            <div class="hamburger-menu">
+                <button type="button" class="menu-button" onclick="toggleMenu()">☰ Menu</button>
+
+                <div class="menu-dropdown" id="menuDropdown">
+                    <a href="index.html">Back to Game</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="box">
+            <h2>Game Idea</h2>
+            <p>
+                The goal of the game is to guess what the final click total for the day will be.
+                Each player enters one guess before the guess window closes. During the day, the pot
+                is clicked and the click total rises. At the end of the day, the player whose guess
+                is closest to the real total wins that day.
+            </p>
+        </section>
+
+        <section class="box">
+            <h2>How to Play</h2>
+            <ol>
+                <li>Choose your character or select your name.</li>
+                <li>Enter one guess for the day’s final click total.</li>
+                <li>Guesses close at 9:10 AM or when clicking starts.</li>
+                <li>The pot is clicked during the day to build the total.</li>
+                <li>If there are accidental clicks, use the misclick box to remove them.</li>
+                <li>At the end of the day, the closest guess wins.</li>
+            </ol>
+        </section>
+
+        <section class="box">
+            <h2>Daily Rules</h2>
+            <ul>
+                <li>Each player gets only one guess per day.</li>
+                <li>A player cannot submit a second guess on the same day.</li>
+                <li>Guesses lock after 9:10 AM.</li>
+                <li>Guesses also lock as soon as clicking begins.</li>
+                <li>The player closest to the final click total wins the day.</li>
+            </ul>
+        </section>
+
+        <section class="box">
+            <h2>Pot Rules</h2>
+            <ul>
+                <li>Each player puts in R2 per day.</li>
+                <li>There are 4 players, so the daily pot is R8.</li>
+                <li>The weekly pot for 5 days is R40.</li>
+                <li>The monthly pot grows based on how many active game days there are in the month.</li>
+                <li>The player with the most wins in the month wins the pot.</li>
+            </ul>
+        </section>
+
+        <section class="box">
+            <h2>Leaderboards</h2>
+            <ul>
+                <li><strong>Daily Leaderboard:</strong> total daily wins overall.</li>
+                <li><strong>Weekly Leaderboard:</strong> wins during the current week.</li>
+                <li><strong>Monthly Leaderboard:</strong> wins during the current month.</li>
+            </ul>
+        </section>
+
+        <section class="box">
+            <h2>Misclick Rule</h2>
+            <p>
+                If accidental clicks happen, enter the number of wrong clicks in the misclick box.
+                The system will remove those clicks from the daily total. Misclicks cannot be more
+                than the current number of clicks for the day.
+            </p>
+        </section>
+
+        <section class="box">
+            <h2>Winning the Pot</h2>
+            <p>
+                The main goal is to collect the most daily wins during the month.
+                The monthly leader is the player with the highest number of wins.
+                At the end of the month, that player wins the full pot.
+            </p>
+        </section>
+
+        <section class="box">
+            <h2>Beginner Tips</h2>
+            <ul>
+                <li>Submit your guess early so you do not miss the 9:10 AM lock.</li>
+                <li>Watch patterns from previous daily results to make smarter guesses.</li>
+                <li>Check the leaderboard often so you know who is leading.</li>
+                <li>Report misclicks immediately so the total stays fair.</li>
+                <li>Use the weekly and monthly boards to track long-term performance.</li>
+            </ul>
+        </section>
+
+        <section class="box">
+            <h2>Scoring System</h2>
+            <ul>
+                <li>The winner of the day gets <strong>1 win</strong>.</li>
+                <li>Daily wins are added into the weekly leaderboard.</li>
+                <li>Weekly wins continue contributing to the monthly leaderboard.</li>
+                <li>The monthly leaderboard decides who wins the full pot.</li>
+            </ul>
+            <p>
+                Example: if William wins Monday and Wednesday, and Nickeel wins Tuesday,
+                then William has 2 wins for that week and Nickeel has 1.
+            </p>
+        </section>
+
+        <section class="box">
+            <h2>Example Round</h2>
+            <p><strong>Players and guesses:</strong></p>
+            <ul>
+                <li>William guesses 45</li>
+                <li>Rylan guesses 38</li>
+                <li>Nickeel guesses 51</li>
+                <li>Kgothatso guesses 42</li>
+            </ul>
+
+            <p><strong>Final click total:</strong> 44</p>
+
+            <p><strong>Differences:</strong></p>
+            <ul>
+                <li>William: 1 away</li>
+                <li>Rylan: 6 away</li>
+                <li>Nickeel: 7 away</li>
+                <li>Kgothatso: 2 away</li>
+            </ul>
+
+            <p>
+                In this example, <strong>William wins the day</strong> because 45 is the closest guess to 44.
+            </p>
+        </section>
+
+    </div>
+
+    <div class="ground">
+        <div class="grass-line"></div>
+        <div class="dirt-line"></div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-torch">🔥</div>
+        <p>
+            Built by the village creators:
+            <strong>Kgothatso</strong>
+            <span class="footer-crown">👑</span>
+            &
+            <strong>Nickeel</strong>
+            <span class="footer-crown">👑</span>
+        </p>
+        <div class="footer-slime">🟦</div>
+        <div class="footer-torch">🔥</div>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById("menuDropdown");
+            if (menu) {
+                menu.classList.toggle("show");
+            }
+        }
+
+        document.addEventListener("click", function (event) {
+            const menu = document.getElementById("menuDropdown");
+            const button = document.querySelector(".menu-button");
+
+            if (!menu || !button) return;
+
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.remove("show");
+            }
+        });
+    </script>
+</body>
+</html>
