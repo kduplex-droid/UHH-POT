@@ -1,21 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pot Click Counter</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UHH Click Guess Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Click the Pot</h1>
+    <h1>UHH Click Guess Game</h1>
+    <p class="subtitle">Guess today's clicks. Closest guess wins.</p>
 
-    <div class="container">
+    <div class="box">
+        <h2>Today's Clicker</h2>
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
              id="pot"
+             alt="Pot"
              onclick="addClick()">
 
-        <h2 id="counter">0</h2>
+        <p>Today's Clicks: <span id="todayCount">0</span></p>
+        <button onclick="resetToday()">Reset Today</button>
+    </div>
 
-        <button onclick="resetCount()">Reset</button>
+    <div class="box">
+        <h2>Enter a Guess</h2>
+        <input type="text" id="playerName" placeholder="Your name">
+        <input type="number" id="playerGuess" placeholder="Your guess">
+        <button onclick="saveGuess()">Save Guess</button>
+
+        <h3>Today's Guesses</h3>
+        <ul id="guessList"></ul>
+    </div>
+
+    <div class="box">
+        <h2>Today's Result</h2>
+        <p>Day: <span id="todayDate"></span></p>
+        <p>Actual Clicks: <span id="actualClicks">0</span></p>
+        <p>Winner: <span id="winnerDisplay">No winner yet</span></p>
+        <button onclick="calculateWinner()">Calculate Winner</button>
+    </div>
+
+    <div class="box">
+        <h2>Daily Results Leaderboard</h2>
+        <ul id="dailyResults"></ul>
     </div>
 
     <script src="script.js"></script>
