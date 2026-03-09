@@ -40,10 +40,126 @@ const CONTRIBUTION_PER_PLAYER = 2;
 const PLAYER_COUNT = 4;
 const WEEK_LENGTH_DAYS = 5;
 
-function saveData() {
-    localStorage.setItem("dailyClicks", JSON.stringify(dailyClicks));
-    localStorage.setItem("dailyGuesses", JSON.stringify(dailyGuesses));
-    localStorage.setItem("dailyWinners", JSON.stringify(dailyWinners));
+function saveGuess() {
+    checkForNewDay();
+
+    if (getCurrentGuessesLocked()) {
+        alert("Guesses are locked. They close at 9:10 AM or when clicking starts.");
+        return;
+    }
+
+    const nameSelect = document.getElementById("playerName");
+    const guessInput = document.getElementById("playerGuess");
+    const passwordInput = document.getElementById("playerPassword");
+    const newPasswordInput = document.getElementById("newPlayerPassword");
+
+    const name = nameSelect.value;
+    const guess = parseInt(guessInput.value, 10);
+    const password = passwordInput.value.trim();
+    const newPassword = newPasswordInput.value.trim();
+
+    selectCharacter(name);
+
+    if (!name || isNaN(guess)) {
+        alert("Choose a player and enter a valid guess.");
+        return;
+    }
+
+    const alreadyGuessed = dailyGuesses[currentDayKey].some(entry => entry.name === name);
+
+    if (alreadyGuessed) {
+        alert(name + " has already made a guess for today.");
+        return;
+    }
+
+    if (!hasPassword(name)) {
+        if (newPassword.length < 4) {
+            alert("First-time setup: create a password with at least 4 characters.");
+            return;
+        }
+
+        setPlayerPassword(name, newPassword);
+        alert("Password created for " + name + ".");
+    } else {
+        if (!verifyPlayerPassword(name, password)) {
+            alert("Incorrect password for " + name + ".");
+            return;
+        }
+    }
+
+    dailyGuesses[currentDayKey].push({
+        name: name,
+        guess: guess
+    });
+
+    guessInput.value = "";
+    passwordInput.value = "";
+    newPasswordInput.value = "";
+
+    saveData();
+    updateDisplay();
+}
+
+function requestPasswordChange() {
+    const nameSelect = document.getElementById("playerName");
+    const passwordInput = document.getElementById("playerPassword");
+    const newPasswordInput = document.getElementById("newPlayerPassword");
+
+    const name = nameSelect.value;
+    const currentPassword = passwordInput.value.trim();
+    const newPassword = newPasswordInput.value.trim();
+
+    if (!name) {
+        alert("Choose a player first.");
+        return;
+    }
+
+    if (!hasPassword(name)) {
+        if (newPassword.length < 4) {
+            alert("Create a password with at least 4 characters.");
+            return;
+        }
+
+        setPlayerPassword(name, newPassword);
+        passwordInput.value = "";
+        newPasswordInput.value = "";
+        alert("Password created for " + name + ".");
+        return;
+    }
+
+    if (!verifyPlayerPassword(name, currentPassword)) {
+        alert("Incorrect current password for " + name + ".");
+        return;
+    }
+
+    if (newPassword.length < 4) {
+        alert("New password must be at least 4 characters.");
+        return;
+    }
+
+    setPlayerPassword(name, newPassword);
+
+    passwordInput.value = "";
+    newPasswordInput.value = "";
+
+    alert("Password changed for " + name + ".");
+}
+
+function savePasswords() {
+    localStorage.setItem("playerPasswords", JSON.stringify(playerPasswords));
+}
+
+function hasPassword(playerName) {
+    return !!playerPasswords[playerName];
+}
+
+function setPlayerPassword(playerName, newPassword) {
+    playerPasswords[playerName] = newPassword;
+    savePasswords();
+}
+
+function verifyPlayerPassword(playerName, password) {
+    return playerPasswords[playerName] === password;
 }
 
 function getCurrentGuessesLocked() {
@@ -430,22 +546,6 @@ function saveGuess() {
 
     guessInput.value = "";
     saveData();
-    function savePasswords() {
-    localStorage.setItem("playerPasswords", JSON.stringify(playerPasswords));
-}
-
-function hasPassword(playerName) {
-    return !!playerPasswords[playerName];
-}
-
-function setPlayerPassword(playerName, newPassword) {
-    playerPasswords[playerName] = newPassword;
-    savePasswords();
-}
-
-function verifyPlayerPassword(playerName, password) {
-    return playerPasswords[playerName] === password;
-}
     updateDisplay();
 }
 
@@ -588,9 +688,27 @@ document.addEventListener("keydown", function(event) {
 });
 
 document.getElementById("playerName").addEventListener("change", function () {
+    const passwordInput = document.getElementById("playerPassword");
+    const newPasswordInput = document.getElementById("newPlayerPassword");
+
     if (this.value) {
         selectCharacter(this.value);
     }
+
+    if (!this.value) {
+        passwordInput.placeholder = "Enter current password";
+        newPasswordInput.placeholder = "Create or change password";
+        return;
+    }
+
+    if (hasPassword(this.value)) {
+        passwordInput.placeholder = "Enter current password";
+        newPasswordInput.placeholder = "Enter new password to change it";
+    } else {
+        passwordInput.placeholder = "No password yet";
+        newPasswordInput.placeholder = "Create your password";
+    }
+});
 });
 
 updateDisplay();
