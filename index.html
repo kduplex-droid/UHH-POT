@@ -20,13 +20,14 @@
         <header class="title-box">
             <h1>UHH TERRARIA CLICK GUESS GAME</h1>
             <p class="subtitle">Guess today's clicks. Closest guess wins.</p>
+
             <div class="hamburger-menu">
                 <button type="button" class="menu-button" onclick="toggleMenu()">☰ Menu</button>
 
-            <div class="menu-dropdown" id="menuDropdown">
-            <a href="guide.html">How to Play</a>
+                <div class="menu-dropdown" id="menuDropdown">
+                    <a href="guide.html">How to Play</a>
+                </div>
             </div>
-</div>
         </header>
 
         <section class="box clicker-box">
@@ -41,7 +42,7 @@
             <div class="pot-area" id="potArea">
                 <button id="potButton" type="button" onclick="addClick()" aria-label="Click the pot">
                     <img src="pot.jpg" id="pot" alt="Pot">
-                    
+                    <div class="pot-icon">🖱</div>
                 </button>
             </div>
 
@@ -122,33 +123,24 @@
             <h2>Enter a Guess</h2>
 
             <select id="playerName">
-    <option value="">Choose player</option>
-    <option value="William">William</option>
-    <option value="Rylan">Rylan</option>
-    <option value="Nickeel">Nickeel</option>
-    <option value="Kgothatso">Kgothatso</option>
-</select>
-
-<input type="number" id="playerGuess" placeholder="Enter your guess">
-
-<input type="password" id="playerPassword" placeholder="Enter current password">
-<input type="password" id="newPlayerPassword" placeholder="Create or change password">
-
-<button type="button" onclick="saveGuess()">Submit Guess</button>
-<button type="button" onclick="requestPasswordChange()">Request Password Change</button>
-
-<p class="password-note">First time using a character? Enter a new password in the second password box.</p>
+                <option value="">Choose player</option>
+                <option value="William">William</option>
+                <option value="Rylan">Rylan</option>
+                <option value="Nickeel">Nickeel</option>
+                <option value="Kgothatso">Kgothatso</option>
+            </select>
 
             <input type="number" id="playerGuess" placeholder="Enter your guess">
 
-            <input 
-                type="password" 
-                id="playerPassword" 
-                placeholder="Enter player password"
-            >
+            <input type="password" id="playerPassword" placeholder="Enter current password">
+            <input type="password" id="newPlayerPassword" placeholder="Create or change password">
 
             <button type="button" onclick="saveGuess()">Submit Guess</button>
-        
+            <button type="button" onclick="requestPasswordChange()">Request Password Change</button>
+            <button type="button" onclick="adminResetPlayerPassword()">Admin Reset Player Password</button>
+
+            <p class="password-note">First time using a character? Enter a new password in the second password box.</p>
+
             <h3>Today's Guesses</h3>
             <ul id="guessList"></ul>
         </section>
@@ -212,7 +204,7 @@
     <audio id="clickSound" preload="auto">
         <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_115b9b3c42.mp3?filename=click-124467.mp3" type="audio/mpeg">
     </audio>
-    
+
     <script src="script.js"></script>
 </body>
 </html>
