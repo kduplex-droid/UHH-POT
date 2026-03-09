@@ -164,6 +164,7 @@ body {
     position: relative;
     display: inline-block;
     width: auto;
+    box-shadow: none;
 }
 
 #potButton:focus {
@@ -239,6 +240,75 @@ body {
     }
 }
 
+.slime-field {
+    position: relative;
+    width: 260px;
+    height: 70px;
+    margin: -10px auto 10px;
+}
+
+.slime {
+    position: absolute;
+    bottom: 0;
+    width: 34px;
+    height: 26px;
+    background: #5cc8ff;
+    border: 3px solid #1c5f87;
+    border-radius: 8px 8px 4px 4px;
+    box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.slime::before,
+.slime::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    width: 4px;
+    height: 4px;
+    background: #111;
+}
+
+.slime::before {
+    left: 8px;
+}
+
+.slime::after {
+    right: 8px;
+}
+
+.slime1 {
+    left: 18px;
+    animation: slimeBounce1 2.2s infinite ease-in-out;
+}
+
+.slime2 {
+    left: 108px;
+    animation: slimeBounce2 2.8s infinite ease-in-out;
+}
+
+.slime3 {
+    right: 18px;
+    animation: slimeBounce3 2.4s infinite ease-in-out;
+}
+
+@keyframes slimeBounce1 {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    30% { transform: translateY(-18px) scaleX(0.95); }
+    50% { transform: translateY(0) scaleX(1.08); }
+}
+
+@keyframes slimeBounce2 {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    35% { transform: translateY(-22px) scaleX(0.93); }
+    55% { transform: translateY(0) scaleX(1.1); }
+}
+
+@keyframes slimeBounce3 {
+    0%, 100% { transform: translateY(0) scaleX(1); }
+    25% { transform: translateY(-16px) scaleX(0.95); }
+    45% { transform: translateY(0) scaleX(1.07); }
+}
+
 .players-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -247,10 +317,17 @@ body {
 }
 
 .player-card {
+    position: relative;
     text-align: center;
     background: #5a3d24;
     border: 4px solid #3b2513;
     padding: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.player-card:hover {
+    transform: translateY(-3px);
 }
 
 .player-card p {
@@ -259,17 +336,66 @@ body {
     font-weight: bold;
 }
 
+.player-selected {
+    background: #6d4a28;
+    box-shadow:
+        0 0 0 4px #ffd84d inset,
+        0 0 16px rgba(255, 216, 77, 0.8),
+        0 0 28px rgba(255, 216, 77, 0.6);
+}
+
+.player-selected .pixel-character {
+    animation: selectedBounce 0.7s infinite alternate;
+}
+
+@keyframes selectedBounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-7px); }
+}
+
+.winner-highlight {
+    box-shadow:
+        0 0 0 4px #ffd84d inset,
+        0 0 22px rgba(255, 216, 77, 0.9),
+        0 0 36px rgba(255, 216, 77, 0.65);
+}
+
+.crown {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 22px;
+    display: none;
+    animation: crownFloat 1s infinite alternate;
+}
+
+@keyframes crownFloat {
+    from { transform: translateX(-50%) translateY(0); }
+    to { transform: translateX(-50%) translateY(-4px); }
+}
+
+.crown-show {
+    display: block;
+}
+
 .pixel-character {
     position: relative;
     width: 54px;
     height: 92px;
     margin: 0 auto;
-    animation: idleBounce 1.3s infinite alternate;
+    animation: idleBounce 1.3s infinite alternate, walkShift 3.4s infinite ease-in-out;
 }
 
 @keyframes idleBounce {
     from { transform: translateY(0); }
     to { transform: translateY(-4px); }
+}
+
+@keyframes walkShift {
+    0% { left: -2px; }
+    50% { left: 2px; }
+    100% { left: -2px; }
 }
 
 .pixel-character .head,
@@ -327,36 +453,60 @@ body {
 .indian1 .right-arm {
     background: #b97845;
 }
-.indian1 .body { background: #9b59b6; }
+
+.indian1 .body {
+    background: #9b59b6;
+}
+
 .indian1 .left-leg,
-.indian1 .right-leg { background: #2c6ed5; }
+.indian1 .right-leg {
+    background: #2c6ed5;
+}
 
 .indian2 .head,
 .indian2 .left-arm,
 .indian2 .right-arm {
     background: #a86435;
 }
-.indian2 .body { background: #f57c00; }
+
+.indian2 .body {
+    background: #f57c00;
+}
+
 .indian2 .left-leg,
-.indian2 .right-leg { background: #275bcb; }
+.indian2 .right-leg {
+    background: #275bcb;
+}
 
 .black1 .head,
 .black1 .left-arm,
 .black1 .right-arm {
     background: #5a3727;
 }
-.black1 .body { background: #28a745; }
+
+.black1 .body {
+    background: #28a745;
+}
+
 .black1 .left-leg,
-.black1 .right-leg { background: #1f56c7; }
+.black1 .right-leg {
+    background: #1f56c7;
+}
 
 .broer1 .head,
 .broer1 .left-arm,
 .broer1 .right-arm {
     background: #f0c38a;
 }
-.broer1 .body { background: #17b6d6; }
+
+.broer1 .body {
+    background: #17b6d6;
+}
+
 .broer1 .left-leg,
-.broer1 .right-leg { background: #5c6778; }
+.broer1 .right-leg {
+    background: #5c6778;
+}
 
 input,
 select {
