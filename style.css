@@ -544,7 +544,8 @@ button:active {
     transform: translateY(2px);
 }
 
-.misclick-box {
+.misclick-box,
+.pot-stats {
     margin-top: 18px;
     padding: 14px;
     background: #5a3d24;
@@ -555,6 +556,11 @@ button:active {
     margin-top: 0;
     color: #ffe49a;
     text-shadow: 2px 2px 0 #4a2e15;
+}
+
+.pot-stats p {
+    margin: 8px 0;
+    color: #fff1cb;
 }
 
 ul,
