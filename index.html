@@ -130,8 +130,15 @@
             </select>
 
             <input type="number" id="playerGuess" placeholder="Enter your guess">
-            <button type="button" onclick="saveGuess()">Save Guess</button>
 
+            <input 
+                type="password" 
+                id="playerPassword" 
+                placeholder="Enter player password"
+            >
+
+            <button type="button" onclick="saveGuess()">Submit Guess</button>
+        
             <h3>Today's Guesses</h3>
             <ul id="guessList"></ul>
         </section>
