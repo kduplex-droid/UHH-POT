@@ -109,15 +109,17 @@ function updateDisplay() {
 
 function animatePot() {
     const pot = document.getElementById("pot");
+    if (!pot) return;
+
     pot.classList.remove("pot-shake");
-
     void pot.offsetWidth;
-
     pot.classList.add("pot-shake");
 }
 
 function createCoin() {
     const potArea = document.getElementById("potArea");
+    if (!potArea) return;
+
     const coin = document.createElement("div");
     coin.className = "coin";
     coin.textContent = "$";
@@ -141,6 +143,19 @@ function addClick() {
 
     animatePot();
     createCoin();
+
+    const sound = document.getElementById("clickSound");
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+    }
+
+    const potButton = document.getElementById("potButton");
+    if (potButton) {
+        potButton.classList.remove("pot-bounce");
+        void potButton.offsetWidth;
+        potButton.classList.add("pot-bounce");
+    }
 }
 
 function saveGuess() {
@@ -221,9 +236,9 @@ function renderLeaderboard() {
     leaderboard.innerHTML = "";
 
     const scores = {
-        Jay: 0,
-        Lebo: 0,
-        Sam: 0,
+        William: 0,
+        Rylan: 0,
+        Nickeel: 0,
         Kgothatso: 0
     };
 
@@ -243,9 +258,6 @@ function renderLeaderboard() {
         leaderboard.appendChild(li);
     });
 }
-
-updateDisplay();
-setInterval(updateDisplay, 60000);
 
 function openResetPrompt() {
     const password = prompt("Enter admin code:");
@@ -302,25 +314,5 @@ document.addEventListener("keydown", function(event) {
     }
 });
 
-function addClick() {
-
-    checkForNewDay();
-
-    dailyClicks[currentDayKey]++;
-    saveData();
-    updateDisplay();
-
-    animatePot();
-    createCoin();
-
-    const sound = document.getElementById("clickSound");
-    sound.currentTime = 0;
-    sound.play();
-
-    const potButton = document.getElementById("potButton");
-
-    potButton.classList.remove("pot-bounce");
-    void potButton.offsetWidth;
-    potButton.classList.add("pot-bounce");
-
-}
+updateDisplay();
+setInterval(updateDisplay, 60000);
