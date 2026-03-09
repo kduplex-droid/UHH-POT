@@ -177,37 +177,3 @@ li {
     cursor: pointer;
     z-index: 9999;
 }
-
-function openResetPrompt() {
-    const password = prompt("Enter admin code:");
-
-    if (password === "UHH2026RESET") {
-        const confirmReset = confirm("Reset the whole site? This will delete all saved data.");
-
-        if (confirmReset) {
-            resetWholeSite();
-        }
-    } else if (password !== null) {
-        alert("Wrong admin code.");
-    }
-}
-
-function resetWholeSite() {
-    localStorage.removeItem("dailyClicks");
-    localStorage.removeItem("dailyGuesses");
-    localStorage.removeItem("dailyWinners");
-
-    dailyClicks = {};
-    dailyGuesses = {};
-    dailyWinners = {};
-
-    currentDayKey = getTodayKey();
-
-    dailyClicks[currentDayKey] = 0;
-    dailyGuesses[currentDayKey] = [];
-
-    saveData();
-    updateDisplay();
-
-    alert("The whole site has been reset.");
-}
