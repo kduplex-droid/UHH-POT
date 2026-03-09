@@ -8,6 +8,18 @@ function getDayName(dateString) {
     return date.toLocaleDateString("en-US", { weekday: "long" });
 }
 
+function getWeekStartKey(dateString) {
+    const date = new Date(dateString + "T00:00:00");
+    const day = date.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    date.setDate(date.getDate() + diff);
+    return date.toISOString().split("T")[0];
+}
+
+function getMonthKey(dateString) {
+    return dateString.slice(0, 7);
+}
+
 let currentDayKey = getTodayKey();
 
 let dailyClicks = JSON.parse(localStorage.getItem("dailyClicks")) || {};
@@ -21,6 +33,11 @@ if (!dailyClicks[currentDayKey]) {
 if (!dailyGuesses[currentDayKey]) {
     dailyGuesses[currentDayKey] = [];
 }
+
+const PLAYER_NAMES = ["William", "Rylan", "Nickeel", "Kgothatso"];
+const CONTRIBUTION_PER_PLAYER = 2;
+const PLAYER_COUNT = 4;
+const WEEK_LENGTH_DAYS = 5;
 
 function saveData() {
     localStorage.setItem("dailyClicks", JSON.stringify(dailyClicks));
@@ -141,6 +158,93 @@ function updateWinnerHighlight() {
     }
 }
 
+function makeScoreObject() {
+    return {
+        William: 0,
+        Rylan: 0,
+        Nickeel: 0,
+        Kgothatso: 0
+    };
+}
+
+function getAllTimeScores() {
+    const scores = makeScoreObject();
+
+    Object.values(dailyWinners).forEach(result => {
+        if (scores.hasOwnProperty(result.name)) {
+            scores[result.name]++;
+        }
+    });
+
+    return scores;
+}
+
+function getCurrentWeekScores() {
+    const scores = makeScoreObject();
+    const currentWeekStart = getWeekStartKey(currentDayKey);
+
+    Object.entries(dailyWinners).forEach(([date, result]) => {
+        if (getWeekStartKey(date) === currentWeekStart && scores.hasOwnProperty(result.name)) {
+            scores[result.name]++;
+        }
+    });
+
+    return scores;
+}
+
+function getCurrentMonthScores() {
+    const scores = makeScoreObject();
+    const currentMonth = getMonthKey(currentDayKey);
+
+    Object.entries(dailyWinners).forEach(([date, result]) => {
+        if (getMonthKey(date) === currentMonth && scores.hasOwnProperty(result.name)) {
+            scores[result.name]++;
+        }
+    });
+
+    return scores;
+}
+
+function sortScores(scores) {
+    return Object.entries(scores).sort((a, b) => b[1] - a[1]);
+}
+
+function getMonthlyGameDaysCount() {
+    const currentMonth = getMonthKey(currentDayKey);
+    const uniqueDays = new Set();
+
+    Object.keys(dailyWinners).forEach(date => {
+        if (getMonthKey(date) === currentMonth) {
+            uniqueDays.add(date);
+        }
+    });
+
+    if ((dailyGuesses[currentDayKey] && dailyGuesses[currentDayKey].length > 0) || (dailyClicks[currentDayKey] && dailyClicks[currentDayKey] > 0)) {
+        uniqueDays.add(currentDayKey);
+    }
+
+    return uniqueDays.size;
+}
+
+function updatePotTracker() {
+    const dailyPot = CONTRIBUTION_PER_PLAYER * PLAYER_COUNT;
+    const weeklyPot = dailyPot * WEEK_LENGTH_DAYS;
+    const monthlyDays = getMonthlyGameDaysCount();
+    const monthlyPot = dailyPot * monthlyDays;
+
+    const monthlyScores = getCurrentMonthScores();
+    const sortedMonthly = sortScores(monthlyScores);
+    const monthlyLeader = sortedMonthly[0];
+    const monthlyWinnerName = monthlyLeader && monthlyLeader[1] > 0 ? monthlyLeader[0] : "-";
+
+    document.getElementById("dailyPot").textContent = `R${dailyPot}`;
+    document.getElementById("weeklyPot").textContent = `R${weeklyPot}`;
+    document.getElementById("monthlyPot").textContent = `R${monthlyPot}`;
+    document.getElementById("monthlyLeader").textContent =
+        monthlyLeader ? `${monthlyLeader[0]} (${monthlyLeader[1]} wins)` : "-";
+    document.getElementById("monthlyWinner").textContent = monthlyWinnerName;
+}
+
 function updateDisplay() {
     checkForNewDay();
 
@@ -166,6 +270,9 @@ function updateDisplay() {
     renderGuesses();
     renderDailyResults();
     renderLeaderboard();
+    renderWeeklyLeaderboard();
+    renderMonthlyLeaderboard();
+    updatePotTracker();
     updateWinnerHighlight();
 }
 
@@ -366,22 +473,33 @@ function renderLeaderboard() {
     const leaderboard = document.getElementById("leaderboard");
     leaderboard.innerHTML = "";
 
-    const scores = {
-        William: 0,
-        Rylan: 0,
-        Nickeel: 0,
-        Kgothatso: 0
-    };
+    const sortedPlayers = sortScores(getAllTimeScores());
 
-    const results = Object.values(dailyWinners);
-
-    results.forEach(result => {
-        if (scores.hasOwnProperty(result.name)) {
-            scores[result.name]++;
-        }
+    sortedPlayers.forEach(player => {
+        const li = document.createElement("li");
+        li.textContent = `${player[0]} — ${player[1]} wins`;
+        leaderboard.appendChild(li);
     });
+}
 
-    const sortedPlayers = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+function renderWeeklyLeaderboard() {
+    const leaderboard = document.getElementById("weeklyLeaderboard");
+    leaderboard.innerHTML = "";
+
+    const sortedPlayers = sortScores(getCurrentWeekScores());
+
+    sortedPlayers.forEach(player => {
+        const li = document.createElement("li");
+        li.textContent = `${player[0]} — ${player[1]} wins`;
+        leaderboard.appendChild(li);
+    });
+}
+
+function renderMonthlyLeaderboard() {
+    const leaderboard = document.getElementById("monthlyLeaderboard");
+    leaderboard.innerHTML = "";
+
+    const sortedPlayers = sortScores(getCurrentMonthScores());
 
     sortedPlayers.forEach(player => {
         const li = document.createElement("li");
