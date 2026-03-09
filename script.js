@@ -32,29 +32,13 @@ function getCurrentGuessesLocked() {
     return dailyClicks[currentDayKey] > 0;
 }
 
-function checkForNewDay() {
-    const realToday = getTodayKey();
-
-    if (realToday !== currentDayKey) {
-        autoClosePreviousDay(currentDayKey);
-
-        currentDayKey = realToday;
-
-        if (!dailyClicks[currentDayKey]) {
-            dailyClicks[currentDayKey] = 0;
-        }
-
-        if (!dailyGuesses[currentDayKey]) {
-            dailyGuesses[currentDayKey] = [];
-        }
-
-        saveData();
-    }
-}
-
 function autoClosePreviousDay(dayKey) {
     const guesses = dailyGuesses[dayKey] || [];
     const actual = dailyClicks[dayKey] || 0;
+
+    if (dailyWinners[dayKey]) {
+        return;
+    }
 
     if (guesses.length === 0) {
         dailyWinners[dayKey] = {
@@ -86,6 +70,26 @@ function autoClosePreviousDay(dayKey) {
     };
 }
 
+function checkForNewDay() {
+    const realToday = getTodayKey();
+
+    if (realToday !== currentDayKey) {
+        autoClosePreviousDay(currentDayKey);
+
+        currentDayKey = realToday;
+
+        if (!dailyClicks[currentDayKey]) {
+            dailyClicks[currentDayKey] = 0;
+        }
+
+        if (!dailyGuesses[currentDayKey]) {
+            dailyGuesses[currentDayKey] = [];
+        }
+
+        saveData();
+    }
+}
+
 function updateDisplay() {
     checkForNewDay();
 
@@ -103,12 +107,40 @@ function updateDisplay() {
     renderLeaderboard();
 }
 
+function animatePot() {
+    const pot = document.getElementById("pot");
+    pot.classList.remove("pot-shake");
+
+    void pot.offsetWidth;
+
+    pot.classList.add("pot-shake");
+}
+
+function createCoin() {
+    const potArea = document.getElementById("potArea");
+    const coin = document.createElement("div");
+    coin.className = "coin";
+    coin.textContent = "$";
+
+    const leftPosition = Math.floor(Math.random() * 150) + 25;
+    coin.style.left = leftPosition + "px";
+
+    potArea.appendChild(coin);
+
+    setTimeout(() => {
+        coin.remove();
+    }, 900);
+}
+
 function addClick() {
     checkForNewDay();
 
     dailyClicks[currentDayKey]++;
     saveData();
     updateDisplay();
+
+    animatePot();
+    createCoin();
 }
 
 function saveGuess() {
@@ -143,7 +175,6 @@ function saveGuess() {
     });
 
     guessInput.value = "";
-
     saveData();
     updateDisplay();
 }
@@ -180,8 +211,7 @@ function renderDailyResults() {
     dates.forEach(date => {
         const result = dailyWinners[date];
         const li = document.createElement("li");
-        li.textContent =
-            `${getDayName(date)} (${date}) — Winner: ${result.name}, Guess: ${result.guess}, Actual: ${result.actual}`;
+        li.textContent = `${getDayName(date)} (${date}) — Winner: ${result.name}, Guess: ${result.guess}, Actual: ${result.actual}`;
         dailyResults.appendChild(li);
     });
 }
@@ -205,9 +235,7 @@ function renderLeaderboard() {
         }
     });
 
-    const sortedPlayers = Object.entries(scores)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 4);
+    const sortedPlayers = Object.entries(scores).sort((a, b) => b[1] - a[1]);
 
     sortedPlayers.forEach(player => {
         const li = document.createElement("li");
@@ -217,5 +245,4 @@ function renderLeaderboard() {
 }
 
 updateDisplay();
-
 setInterval(updateDisplay, 60000);
