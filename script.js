@@ -1,11 +1,9 @@
 function getTodayKey() {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
+    return new Date().toISOString().split("T")[0];
 }
 
 function getDayName(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", { weekday: "long" });
+    return new Date(dateString).toLocaleDateString("en-US", { weekday: "long" });
 }
 
 function getWeekStartKey(dateString) {
@@ -19,6 +17,11 @@ function getWeekStartKey(dateString) {
 function getMonthKey(dateString) {
     return dateString.slice(0, 7);
 }
+
+const PLAYER_NAMES = ["William", "Rylan", "Nickeel", "Kgothatso"];
+const CONTRIBUTION_PER_PLAYER = 2;
+const PLAYER_COUNT = 4;
+const WEEK_LENGTH_DAYS = 5;
 
 let currentDayKey = getTodayKey();
 
@@ -35,10 +38,372 @@ if (!dailyGuesses[currentDayKey]) {
     dailyGuesses[currentDayKey] = [];
 }
 
-const PLAYER_NAMES = ["William", "Rylan", "Nickeel", "Kgothatso"];
-const CONTRIBUTION_PER_PLAYER = 2;
-const PLAYER_COUNT = 4;
-const WEEK_LENGTH_DAYS = 5;
+function saveData() {
+    localStorage.setItem("dailyClicks", JSON.stringify(dailyClicks));
+    localStorage.setItem("dailyGuesses", JSON.stringify(dailyGuesses));
+    localStorage.setItem("dailyWinners", JSON.stringify(dailyWinners));
+}
+
+function savePasswords() {
+    localStorage.setItem("playerPasswords", JSON.stringify(playerPasswords));
+}
+
+function hasPassword(playerName) {
+    return !!playerPasswords[playerName];
+}
+
+function setPlayerPassword(playerName, newPassword) {
+    playerPasswords[playerName] = newPassword;
+    savePasswords();
+}
+
+function verifyPlayerPassword(playerName, password) {
+    return playerPasswords[playerName] === password;
+}
+
+function getCurrentGuessesLocked() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const isAfterCutoff = hours > 9 || (hours === 9 && minutes >= 10);
+
+    return isAfterCutoff || dailyClicks[currentDayKey] > 0;
+}
+
+function autoClosePreviousDay(dayKey) {
+    const guesses = dailyGuesses[dayKey] || [];
+    const actual = dailyClicks[dayKey] || 0;
+
+    if (dailyWinners[dayKey]) {
+        return;
+    }
+
+    if (guesses.length === 0) {
+        dailyWinners[dayKey] = {
+            name: "No guesses",
+            guess: "-",
+            actual: actual,
+            difference: "-"
+        };
+        return;
+    }
+
+    let winner = guesses[0];
+    let smallestDifference = Math.abs(guesses[0].guess - actual);
+
+    for (let i = 1; i < guesses.length; i++) {
+        const difference = Math.abs(guesses[i].guess - actual);
+        if (difference < smallestDifference) {
+            smallestDifference = difference;
+            winner = guesses[i];
+        }
+    }
+
+    dailyWinners[dayKey] = {
+        name: winner.name,
+        guess: winner.guess,
+        actual: actual,
+        difference: smallestDifference
+    };
+}
+
+function checkForNewDay() {
+    const realToday = getTodayKey();
+
+    if (realToday !== currentDayKey) {
+        autoClosePreviousDay(currentDayKey);
+        currentDayKey = realToday;
+
+        if (!dailyClicks[currentDayKey]) {
+            dailyClicks[currentDayKey] = 0;
+        }
+
+        if (!dailyGuesses[currentDayKey]) {
+            dailyGuesses[currentDayKey] = [];
+        }
+
+        saveData();
+    }
+}
+
+function selectCharacter(name) {
+    document.querySelectorAll(".player-card").forEach(card => {
+        card.classList.remove("player-selected");
+    });
+
+    const selectedCard = document.getElementById("player-" + name);
+    if (selectedCard) {
+        selectedCard.classList.add("player-selected");
+    }
+
+    const playerSelect = document.getElementById("playerName");
+    if (playerSelect) {
+        playerSelect.value = name;
+    }
+}
+
+function clearCrowns() {
+    document.querySelectorAll(".crown").forEach(crown => {
+        crown.classList.remove("crown-show");
+    });
+}
+
+function updateWinnerHighlight() {
+    document.querySelectorAll(".player-card").forEach(card => {
+        card.classList.remove("winner-highlight");
+    });
+
+    clearCrowns();
+
+    const todayWinner = dailyWinners[currentDayKey];
+
+    if (todayWinner && todayWinner.name && todayWinner.name !== "No guesses") {
+        const winnerCard = document.getElementById("player-" + todayWinner.name);
+        const winnerCrown = document.getElementById("crown-" + todayWinner.name);
+
+        if (winnerCard) {
+            winnerCard.classList.add("winner-highlight");
+        }
+
+        if (winnerCrown) {
+            winnerCrown.classList.add("crown-show");
+        }
+    }
+}
+
+function makeScoreObject() {
+    return {
+        William: 0,
+        Rylan: 0,
+        Nickeel: 0,
+        Kgothatso: 0
+    };
+}
+
+function sortScores(scores) {
+    return Object.entries(scores).sort((a, b) => b[1] - a[1]);
+}
+
+function getAllTimeScores() {
+    const scores = makeScoreObject();
+
+    Object.values(dailyWinners).forEach(result => {
+        if (scores.hasOwnProperty(result.name)) {
+            scores[result.name]++;
+        }
+    });
+
+    return scores;
+}
+
+function getCurrentWeekScores() {
+    const scores = makeScoreObject();
+    const currentWeekStart = getWeekStartKey(currentDayKey);
+
+    Object.entries(dailyWinners).forEach(([date, result]) => {
+        if (getWeekStartKey(date) === currentWeekStart && scores.hasOwnProperty(result.name)) {
+            scores[result.name]++;
+        }
+    });
+
+    return scores;
+}
+
+function getCurrentMonthScores() {
+    const scores = makeScoreObject();
+    const currentMonth = getMonthKey(currentDayKey);
+
+    Object.entries(dailyWinners).forEach(([date, result]) => {
+        if (getMonthKey(date) === currentMonth && scores.hasOwnProperty(result.name)) {
+            scores[result.name]++;
+        }
+    });
+
+    return scores;
+}
+
+function getMonthlyGameDaysCount() {
+    const currentMonth = getMonthKey(currentDayKey);
+    const uniqueDays = new Set();
+
+    Object.keys(dailyWinners).forEach(date => {
+        if (getMonthKey(date) === currentMonth) {
+            uniqueDays.add(date);
+        }
+    });
+
+    if (
+        (dailyGuesses[currentDayKey] && dailyGuesses[currentDayKey].length > 0) ||
+        (dailyClicks[currentDayKey] && dailyClicks[currentDayKey] > 0)
+    ) {
+        uniqueDays.add(currentDayKey);
+    }
+
+    return uniqueDays.size;
+}
+
+function updatePotTracker() {
+    const dailyPot = CONTRIBUTION_PER_PLAYER * PLAYER_COUNT;
+    const weeklyPot = dailyPot * WEEK_LENGTH_DAYS;
+    const monthlyDays = getMonthlyGameDaysCount();
+    const monthlyPot = dailyPot * monthlyDays;
+
+    const monthlyScores = getCurrentMonthScores();
+    const sortedMonthly = sortScores(monthlyScores);
+    const monthlyLeader = sortedMonthly[0];
+    const monthlyWinnerName = monthlyLeader && monthlyLeader[1] > 0 ? monthlyLeader[0] : "-";
+
+    document.getElementById("dailyPot").textContent = `R${dailyPot}`;
+    document.getElementById("weeklyPot").textContent = `R${weeklyPot}`;
+    document.getElementById("monthlyPot").textContent = `R${monthlyPot}`;
+    document.getElementById("monthlyLeader").textContent =
+        monthlyLeader ? `${monthlyLeader[0]} (${monthlyLeader[1]} wins)` : "-";
+    document.getElementById("monthlyWinner").textContent = monthlyWinnerName;
+}
+
+function updateDisplay() {
+    checkForNewDay();
+
+    document.getElementById("dayName").textContent = getDayName(currentDayKey);
+    document.getElementById("todayDate").textContent = currentDayKey;
+    document.getElementById("todayCount").textContent = dailyClicks[currentDayKey];
+
+    const guessStatus = document.getElementById("guessStatus");
+
+    if (dailyClicks[currentDayKey] > 0) {
+        guessStatus.textContent = "Guesses are locked because clicking has started";
+    } else {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const isAfterCutoff = hours > 9 || (hours === 9 && minutes >= 10);
+
+        guessStatus.textContent = isAfterCutoff
+            ? "Guesses are locked after 9:10 AM"
+            : "Guesses are open until 9:10 AM";
+    }
+
+    renderGuesses();
+    renderDailyResults();
+    renderLeaderboard();
+    renderWeeklyLeaderboard();
+    renderMonthlyLeaderboard();
+    updatePotTracker();
+    updateWinnerHighlight();
+}
+
+function updateCountdown() {
+    const countdownElement = document.getElementById("nextGuessCountdown");
+    if (!countdownElement) return;
+
+    const now = new Date();
+    const nextGuessTime = new Date();
+
+    nextGuessTime.setHours(9, 10, 0, 0);
+
+    if (now >= nextGuessTime) {
+        nextGuessTime.setDate(nextGuessTime.getDate() + 1);
+    }
+
+    const diff = nextGuessTime - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    countdownElement.textContent = `Next guess window in: ${hours}h ${minutes}m ${seconds}s`;
+}
+
+function updateDayEndCountdown() {
+    const dayEndElement = document.getElementById("dayEndCountdown");
+    if (!dayEndElement) return;
+
+    const now = new Date();
+    const endOfDay = new Date();
+
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const diff = endOfDay - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    dayEndElement.textContent = `Today ends in: ${hours}h ${minutes}m ${seconds}s`;
+}
+
+function animatePot() {
+    const pot = document.getElementById("pot");
+    if (!pot) return;
+
+    pot.classList.remove("pot-shake");
+    void pot.offsetWidth;
+    pot.classList.add("pot-shake");
+}
+
+function createCoin() {
+    const potArea = document.getElementById("potArea");
+    if (!potArea) return;
+
+    const coin = document.createElement("div");
+    coin.className = "coin";
+    coin.textContent = "🪙";
+
+    const leftPosition = Math.floor(Math.random() * 150) + 40;
+    coin.style.left = leftPosition + "px";
+
+    potArea.appendChild(coin);
+
+    setTimeout(() => {
+        coin.remove();
+    }, 900);
+}
+
+function addClick() {
+    checkForNewDay();
+
+    dailyClicks[currentDayKey]++;
+    saveData();
+    updateDisplay();
+
+    animatePot();
+    createCoin();
+
+    const sound = document.getElementById("clickSound");
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(() => {});
+    }
+
+    const potButton = document.getElementById("potButton");
+    if (potButton) {
+        potButton.classList.remove("pot-bounce");
+        void potButton.offsetWidth;
+        potButton.classList.add("pot-bounce");
+    }
+}
+
+function reportMisclicks() {
+    checkForNewDay();
+
+    const misclickInput = document.getElementById("misclickAmount");
+    const misclicks = parseInt(misclickInput.value, 10);
+
+    if (isNaN(misclicks) || misclicks <= 0) {
+        alert("Enter a valid number of misclicks.");
+        return;
+    }
+
+    if (misclicks > dailyClicks[currentDayKey]) {
+        alert("Misclicks cannot be more than today's clicks.");
+        return;
+    }
+
+    dailyClicks[currentDayKey] -= misclicks;
+    saveData();
+    updateDisplay();
+
+    misclickInput.value = "";
+    alert(misclicks + " misclick(s) removed.");
+}
 
 function saveGuess() {
     checkForNewDay();
@@ -145,408 +510,39 @@ function requestPasswordChange() {
     alert("Password changed for " + name + ".");
 }
 
-function savePasswords() {
-    localStorage.setItem("playerPasswords", JSON.stringify(playerPasswords));
-}
-
-function hasPassword(playerName) {
-    return !!playerPasswords[playerName];
-}
-
-function setPlayerPassword(playerName, newPassword) {
-    playerPasswords[playerName] = newPassword;
-    savePasswords();
-}
-
-function verifyPlayerPassword(playerName, password) {
-    return playerPasswords[playerName] === password;
-}
-
-function getCurrentGuessesLocked() {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-
-    const isAfterCutoff = hours > 9 || (hours === 9 && minutes >= 10);
-
-    return isAfterCutoff || dailyClicks[currentDayKey] > 0;
-}
-
-function autoClosePreviousDay(dayKey) {
-    const guesses = dailyGuesses[dayKey] || [];
-    const actual = dailyClicks[dayKey] || 0;
-
-    if (dailyWinners[dayKey]) {
-        return;
-    }
-
-    if (guesses.length === 0) {
-        dailyWinners[dayKey] = {
-            name: "No guesses",
-            guess: "-",
-            actual: actual,
-            difference: "-"
-        };
-        return;
-    }
-
-    let winner = guesses[0];
-    let smallestDifference = Math.abs(guesses[0].guess - actual);
-
-    for (let i = 1; i < guesses.length; i++) {
-        const difference = Math.abs(guesses[i].guess - actual);
-
-        if (difference < smallestDifference) {
-            smallestDifference = difference;
-            winner = guesses[i];
-        }
-    }
-
-    dailyWinners[dayKey] = {
-        name: winner.name,
-        guess: winner.guess,
-        actual: actual,
-        difference: smallestDifference
-    };
-}
-
-function checkForNewDay() {
-    const realToday = getTodayKey();
-
-    if (realToday !== currentDayKey) {
-        autoClosePreviousDay(currentDayKey);
-
-        currentDayKey = realToday;
-
-        if (!dailyClicks[currentDayKey]) {
-            dailyClicks[currentDayKey] = 0;
-        }
-
-        if (!dailyGuesses[currentDayKey]) {
-            dailyGuesses[currentDayKey] = [];
-        }
-
-        saveData();
-    }
-}
-
-function selectCharacter(name) {
-    document.querySelectorAll(".player-card").forEach(card => {
-        card.classList.remove("player-selected");
-    });
-
-    const selectedCard = document.getElementById("player-" + name);
-    if (selectedCard) {
-        selectedCard.classList.add("player-selected");
-    }
-
-    const playerSelect = document.getElementById("playerName");
-    if (playerSelect) {
-        playerSelect.value = name;
-    }
-}
-
-function clearCrowns() {
-    document.querySelectorAll(".crown").forEach(crown => {
-        crown.classList.remove("crown-show");
-    });
-}
-
-function updateWinnerHighlight() {
-    document.querySelectorAll(".player-card").forEach(card => {
-        card.classList.remove("winner-highlight");
-    });
-
-    clearCrowns();
-
-    const todayWinner = dailyWinners[currentDayKey];
-
-    if (todayWinner && todayWinner.name && todayWinner.name !== "No guesses") {
-        const winnerCard = document.getElementById("player-" + todayWinner.name);
-        const winnerCrown = document.getElementById("crown-" + todayWinner.name);
-
-        if (winnerCard) {
-            winnerCard.classList.add("winner-highlight");
-        }
-
-        if (winnerCrown) {
-            winnerCrown.classList.add("crown-show");
-        }
-    }
-}
-
-function makeScoreObject() {
-    return {
-        William: 0,
-        Rylan: 0,
-        Nickeel: 0,
-        Kgothatso: 0
-    };
-}
-
-function getAllTimeScores() {
-    const scores = makeScoreObject();
-
-    Object.values(dailyWinners).forEach(result => {
-        if (scores.hasOwnProperty(result.name)) {
-            scores[result.name]++;
-        }
-    });
-
-    return scores;
-}
-
-function getCurrentWeekScores() {
-    const scores = makeScoreObject();
-    const currentWeekStart = getWeekStartKey(currentDayKey);
-
-    Object.entries(dailyWinners).forEach(([date, result]) => {
-        if (getWeekStartKey(date) === currentWeekStart && scores.hasOwnProperty(result.name)) {
-            scores[result.name]++;
-        }
-    });
-
-    return scores;
-}
-
-function getCurrentMonthScores() {
-    const scores = makeScoreObject();
-    const currentMonth = getMonthKey(currentDayKey);
-
-    Object.entries(dailyWinners).forEach(([date, result]) => {
-        if (getMonthKey(date) === currentMonth && scores.hasOwnProperty(result.name)) {
-            scores[result.name]++;
-        }
-    });
-
-    return scores;
-}
-
-function sortScores(scores) {
-    return Object.entries(scores).sort((a, b) => b[1] - a[1]);
-}
-
-function getMonthlyGameDaysCount() {
-    const currentMonth = getMonthKey(currentDayKey);
-    const uniqueDays = new Set();
-
-    Object.keys(dailyWinners).forEach(date => {
-        if (getMonthKey(date) === currentMonth) {
-            uniqueDays.add(date);
-        }
-    });
-
-    if ((dailyGuesses[currentDayKey] && dailyGuesses[currentDayKey].length > 0) || (dailyClicks[currentDayKey] && dailyClicks[currentDayKey] > 0)) {
-        uniqueDays.add(currentDayKey);
-    }
-
-    return uniqueDays.size;
-}
-
-function updatePotTracker() {
-    const dailyPot = CONTRIBUTION_PER_PLAYER * PLAYER_COUNT;
-    const weeklyPot = dailyPot * WEEK_LENGTH_DAYS;
-    const monthlyDays = getMonthlyGameDaysCount();
-    const monthlyPot = dailyPot * monthlyDays;
-
-    const monthlyScores = getCurrentMonthScores();
-    const sortedMonthly = sortScores(monthlyScores);
-    const monthlyLeader = sortedMonthly[0];
-    const monthlyWinnerName = monthlyLeader && monthlyLeader[1] > 0 ? monthlyLeader[0] : "-";
-
-    document.getElementById("dailyPot").textContent = `R${dailyPot}`;
-    document.getElementById("weeklyPot").textContent = `R${weeklyPot}`;
-    document.getElementById("monthlyPot").textContent = `R${monthlyPot}`;
-    document.getElementById("monthlyLeader").textContent =
-        monthlyLeader ? `${monthlyLeader[0]} (${monthlyLeader[1]} wins)` : "-";
-    document.getElementById("monthlyWinner").textContent = monthlyWinnerName;
-}
-
-function updateDisplay() {
-    checkForNewDay();
-
-    document.getElementById("dayName").textContent = getDayName(currentDayKey);
-    document.getElementById("todayDate").textContent = currentDayKey;
-    document.getElementById("todayCount").textContent = dailyClicks[currentDayKey];
-
-    const guessStatus = document.getElementById("guessStatus");
-
-    if (dailyClicks[currentDayKey] > 0) {
-        guessStatus.textContent = "Guesses are locked because clicking has started";
-    } else {
-        const now = new Date();
-        const hours = now.getHours();
-        const minutes = now.getMinutes();
-        const isAfterCutoff = hours > 9 || (hours === 9 && minutes >= 10);
-
-        guessStatus.textContent = isAfterCutoff
-            ? "Guesses are locked after 9:10 AM"
-            : "Guesses are open until 9:10 AM";
-    }
-
-    renderGuesses();
-    renderDailyResults();
-    renderLeaderboard();
-    renderWeeklyLeaderboard();
-    renderMonthlyLeaderboard();
-    updatePotTracker();
-    updateWinnerHighlight();
-}
-
-function updateCountdown() {
-    const countdownElement = document.getElementById("nextGuessCountdown");
-    if (!countdownElement) return;
-
-    const now = new Date();
-
-    const nextGuessTime = new Date();
-    nextGuessTime.setHours(9, 10, 0, 0);
-
-    if (now >= nextGuessTime) {
-        nextGuessTime.setDate(nextGuessTime.getDate() + 1);
-    }
-
-    const diff = nextGuessTime - now;
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    countdownElement.textContent =
-        `Next guess window in: ${hours}h ${minutes}m ${seconds}s`;
-}
-
-function updateDayEndCountdown() {
-    const dayEndElement = document.getElementById("dayEndCountdown");
-    if (!dayEndElement) return;
-
-    const now = new Date();
-
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const diff = endOfDay - now;
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    dayEndElement.textContent =
-        `Today ends in: ${hours}h ${minutes}m ${seconds}s`;
-}
-
-function animatePot() {
-    const pot = document.getElementById("pot");
-    if (!pot) return;
-
-    pot.classList.remove("pot-shake");
-    void pot.offsetWidth;
-    pot.classList.add("pot-shake");
-}
-
-function createCoin() {
-    const potArea = document.getElementById("potArea");
-    if (!potArea) return;
-
-    const coin = document.createElement("div");
-    coin.className = "coin";
-    coin.textContent = "🪙";
-
-    const leftPosition = Math.floor(Math.random() * 150) + 40;
-    coin.style.left = leftPosition + "px";
-
-    potArea.appendChild(coin);
-
-    setTimeout(() => {
-        coin.remove();
-    }, 900);
-}
-
-function addClick() {
-    checkForNewDay();
-
-    dailyClicks[currentDayKey]++;
-    saveData();
-    updateDisplay();
-
-    animatePot();
-    createCoin();
-
-    const sound = document.getElementById("clickSound");
-    if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(() => {});
-    }
-
-    const potButton = document.getElementById("potButton");
-    if (potButton) {
-        potButton.classList.remove("pot-bounce");
-        void potButton.offsetWidth;
-        potButton.classList.add("pot-bounce");
-    }
-}
-
-function reportMisclicks() {
-    checkForNewDay();
-
-    const misclickInput = document.getElementById("misclickAmount");
-    const misclicks = parseInt(misclickInput.value, 10);
-
-    if (isNaN(misclicks) || misclicks <= 0) {
-        alert("Enter a valid number of misclicks.");
-        return;
-    }
-
-    if (misclicks > dailyClicks[currentDayKey]) {
-        alert("Misclicks cannot be more than today's clicks.");
-        return;
-    }
-
-    dailyClicks[currentDayKey] -= misclicks;
-
-    saveData();
-    updateDisplay();
-
-    misclickInput.value = "";
-
-    alert(misclicks + " misclick(s) removed.");
-}
-
-function saveGuess() {
-    checkForNewDay();
-
-    if (getCurrentGuessesLocked()) {
-        alert("Guesses are locked. They close at 9:10 AM or when clicking starts.");
-        return;
-    }
-
+function adminResetPlayerPassword() {
     const nameSelect = document.getElementById("playerName");
-    const guessInput = document.getElementById("playerGuess");
+    const passwordInput = document.getElementById("playerPassword");
+    const newPasswordInput = document.getElementById("newPlayerPassword");
 
     const name = nameSelect.value;
-    selectCharacter(name);
-    const guess = parseInt(guessInput.value);
 
-    if (!name || isNaN(guess)) {
-        alert("Choose a player and enter a valid guess.");
+    if (!name) {
+        alert("Choose a player first.");
         return;
     }
 
-    const alreadyGuessed = dailyGuesses[currentDayKey].some(entry => entry.name === name);
+    const adminCode = prompt("Enter admin code to reset this player's password:");
 
-    if (alreadyGuessed) {
-        alert(name + " has already made a guess for today.");
+    if (adminCode !== "UHH2026RESET") {
+        if (adminCode !== null) {
+            alert("Wrong admin code.");
+        }
         return;
     }
 
-    dailyGuesses[currentDayKey].push({
-        name: name,
-        guess: guess
-    });
+    const confirmReset = confirm("Reset password for " + name + "?");
+    if (!confirmReset) {
+        return;
+    }
 
-    guessInput.value = "";
-    saveData();
-    updateDisplay();
+    delete playerPasswords[name];
+    savePasswords();
+
+    passwordInput.value = "";
+    newPasswordInput.value = "";
+
+    alert("Password reset for " + name + ". They can now create a new one.");
 }
 
 function renderGuesses() {
@@ -590,9 +586,7 @@ function renderLeaderboard() {
     const leaderboard = document.getElementById("leaderboard");
     leaderboard.innerHTML = "";
 
-    const sortedPlayers = sortScores(getAllTimeScores());
-
-    sortedPlayers.forEach(player => {
+    sortScores(getAllTimeScores()).forEach(player => {
         const li = document.createElement("li");
         li.textContent = `${player[0]} — ${player[1]} wins`;
         leaderboard.appendChild(li);
@@ -603,9 +597,7 @@ function renderWeeklyLeaderboard() {
     const leaderboard = document.getElementById("weeklyLeaderboard");
     leaderboard.innerHTML = "";
 
-    const sortedPlayers = sortScores(getCurrentWeekScores());
-
-    sortedPlayers.forEach(player => {
+    sortScores(getCurrentWeekScores()).forEach(player => {
         const li = document.createElement("li");
         li.textContent = `${player[0]} — ${player[1]} wins`;
         leaderboard.appendChild(li);
@@ -616,9 +608,7 @@ function renderMonthlyLeaderboard() {
     const leaderboard = document.getElementById("monthlyLeaderboard");
     leaderboard.innerHTML = "";
 
-    const sortedPlayers = sortScores(getCurrentMonthScores());
-
-    sortedPlayers.forEach(player => {
+    sortScores(getCurrentMonthScores()).forEach(player => {
         const li = document.createElement("li");
         li.textContent = `${player[0]} — ${player[1]} wins`;
         leaderboard.appendChild(li);
@@ -649,7 +639,6 @@ function resetWholeSite() {
     dailyWinners = {};
 
     currentDayKey = getTodayKey();
-
     dailyClicks[currentDayKey] = 0;
     dailyGuesses[currentDayKey] = [];
 
@@ -666,10 +655,17 @@ function resetWholeSite() {
     alert("The whole site has been reset.");
 }
 
+function toggleMenu() {
+    const menu = document.getElementById("menuDropdown");
+    if (menu) {
+        menu.classList.toggle("show");
+    }
+}
+
 let resetKeyCount = 0;
 let lastResetKeyTime = 0;
 
-document.addEventListener("keydown", function(event) {
+document.addEventListener("keydown", function (event) {
     const now = Date.now();
 
     if (event.shiftKey && event.key.toLowerCase() === "r") {
@@ -684,6 +680,17 @@ document.addEventListener("keydown", function(event) {
             resetKeyCount = 0;
             openResetPrompt();
         }
+    }
+});
+
+document.addEventListener("click", function (event) {
+    const menu = document.getElementById("menuDropdown");
+    const button = document.querySelector(".menu-button");
+
+    if (!menu || !button) return;
+
+    if (!menu.contains(event.target) && !button.contains(event.target)) {
+        menu.classList.remove("show");
     }
 });
 
@@ -709,7 +716,6 @@ document.getElementById("playerName").addEventListener("change", function () {
         newPasswordInput.placeholder = "Create your password";
     }
 });
-});
 
 updateDisplay();
 updateCountdown();
@@ -718,21 +724,3 @@ updateDayEndCountdown();
 setInterval(updateDisplay, 60000);
 setInterval(updateCountdown, 1000);
 setInterval(updateDayEndCountdown, 1000);
-
-function toggleMenu() {
-    const menu = document.getElementById("menuDropdown");
-    if (menu) {
-        menu.classList.toggle("show");
-    }
-}
-
-document.addEventListener("click", function (event) {
-    const menu = document.getElementById("menuDropdown");
-    const button = document.querySelector(".menu-button");
-
-    if (!menu || !button) return;
-
-    if (!menu.contains(event.target) && !button.contains(event.target)) {
-        menu.classList.remove("show");
-    }
-});
