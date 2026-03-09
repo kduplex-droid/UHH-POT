@@ -123,6 +123,48 @@ function updateDisplay() {
     renderLeaderboard();
 }
 
+function updateCountdown() {
+    const countdownElement = document.getElementById("nextGuessCountdown");
+    if (!countdownElement) return;
+
+    const now = new Date();
+
+    const nextGuessTime = new Date();
+    nextGuessTime.setHours(9, 10, 0, 0);
+
+    if (now >= nextGuessTime) {
+        nextGuessTime.setDate(nextGuessTime.getDate() + 1);
+    }
+
+    const diff = nextGuessTime - now;
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    countdownElement.textContent =
+        `Next guess window in: ${hours}h ${minutes}m ${seconds}s`;
+}
+
+function updateDayEndCountdown() {
+    const dayEndElement = document.getElementById("dayEndCountdown");
+    if (!dayEndElement) return;
+
+    const now = new Date();
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const diff = endOfDay - now;
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    dayEndElement.textContent =
+        `Today ends in: ${hours}h ${minutes}m ${seconds}s`;
+}
+
 function animatePot() {
     const pot = document.getElementById("pot");
     if (!pot) return;
@@ -305,6 +347,8 @@ function resetWholeSite() {
 
     saveData();
     updateDisplay();
+    updateCountdown();
+    updateDayEndCountdown();
 
     alert("The whole site has been reset.");
 }
@@ -331,4 +375,9 @@ document.addEventListener("keydown", function(event) {
 });
 
 updateDisplay();
+updateCountdown();
+updateDayEndCountdown();
+
 setInterval(updateDisplay, 60000);
+setInterval(updateCountdown, 1000);
+setInterval(updateDayEndCountdown, 1000);
