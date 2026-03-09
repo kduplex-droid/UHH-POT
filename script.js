@@ -301,3 +301,26 @@ document.addEventListener("keydown", function(event) {
         }
     }
 });
+
+function addClick() {
+
+    checkForNewDay();
+
+    dailyClicks[currentDayKey]++;
+    saveData();
+    updateDisplay();
+
+    animatePot();
+    createCoin();
+
+    const sound = document.getElementById("clickSound");
+    sound.currentTime = 0;
+    sound.play();
+
+    const potButton = document.getElementById("potButton");
+
+    potButton.classList.remove("pot-bounce");
+    void potButton.offsetWidth;
+    potButton.classList.add("pot-bounce");
+
+}
