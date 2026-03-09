@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Pot Click Counter</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h1>Click the Pot</h1>
+    <h1>Click the Pot</h1>
 
-<div class="container">
+    <div class="container">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
+             id="pot"
+             onclick="addClick()">
 
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Clay_pot.jpg"
-         id="pot"
-         onclick="addClick()">
+        <h2 id="counter">0</h2>
 
-    <h2 id="counter">0</h2>
+        <button onclick="resetCount()">Reset</button>
+    </div>
 
-</div>
-
-<script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
