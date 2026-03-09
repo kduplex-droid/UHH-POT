@@ -25,6 +25,7 @@ let currentDayKey = getTodayKey();
 let dailyClicks = JSON.parse(localStorage.getItem("dailyClicks")) || {};
 let dailyGuesses = JSON.parse(localStorage.getItem("dailyGuesses")) || {};
 let dailyWinners = JSON.parse(localStorage.getItem("dailyWinners")) || {};
+let playerPasswords = JSON.parse(localStorage.getItem("playerPasswords")) || {};
 
 if (!dailyClicks[currentDayKey]) {
     dailyClicks[currentDayKey] = 0;
@@ -429,6 +430,22 @@ function saveGuess() {
 
     guessInput.value = "";
     saveData();
+    function savePasswords() {
+    localStorage.setItem("playerPasswords", JSON.stringify(playerPasswords));
+}
+
+function hasPassword(playerName) {
+    return !!playerPasswords[playerName];
+}
+
+function setPlayerPassword(playerName, newPassword) {
+    playerPasswords[playerName] = newPassword;
+    savePasswords();
+}
+
+function verifyPlayerPassword(playerName, password) {
+    return playerPasswords[playerName] === password;
+}
     updateDisplay();
 }
 
