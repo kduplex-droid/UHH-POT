@@ -57,6 +57,25 @@ function setPlayerPassword(playerName, newPassword) {
     savePasswords();
 }
 
+let gameLogs = JSON.parse(localStorage.getItem("gameLogs")) || [];
+
+function logEvent(type, message) {
+    const logEntry = {
+        time: new Date().toISOString(),
+        type: type,
+        message: message
+    };
+
+    gameLogs.push(logEntry);
+
+    if (gameLogs.length > 500) {
+        gameLogs.shift();
+    }
+
+    localStorage.setItem("gameLogs", JSON.stringify(gameLogs));
+    console.log(`[${type}] ${message}`);
+}
+
 function verifyPlayerPassword(playerName, password) {
     return playerPasswords[playerName] === password;
 }
