@@ -29,6 +29,7 @@ let dailyClicks = JSON.parse(localStorage.getItem("dailyClicks")) || {};
 let dailyGuesses = JSON.parse(localStorage.getItem("dailyGuesses")) || {};
 let dailyWinners = JSON.parse(localStorage.getItem("dailyWinners")) || {};
 let playerPasswords = JSON.parse(localStorage.getItem("playerPasswords")) || {};
+let gameLogs = JSON.parse(localStorage.getItem("gameLogs")) || [];
 
 if (!dailyClicks[currentDayKey]) {
     dailyClicks[currentDayKey] = 0;
@@ -36,6 +37,23 @@ if (!dailyClicks[currentDayKey]) {
 
 if (!dailyGuesses[currentDayKey]) {
     dailyGuesses[currentDayKey] = [];
+}
+
+function logEvent(type, message) {
+    const logEntry = {
+        time: new Date().toISOString(),
+        type: type,
+        message: message
+    };
+
+    gameLogs.push(logEntry);
+
+    if (gameLogs.length > 500) {
+        gameLogs.shift();
+    }
+
+    localStorage.setItem("gameLogs", JSON.stringify(gameLogs));
+    console.log(`[${type}] ${message}`);
 }
 
 function saveData() {
@@ -55,25 +73,6 @@ function hasPassword(playerName) {
 function setPlayerPassword(playerName, newPassword) {
     playerPasswords[playerName] = newPassword;
     savePasswords();
-}
-
-let gameLogs = JSON.parse(localStorage.getItem("gameLogs")) || [];
-
-function logEvent(type, message) {
-    const logEntry = {
-        time: new Date().toISOString(),
-        type: type,
-        message: message
-    };
-
-    gameLogs.push(logEntry);
-
-    if (gameLogs.length > 500) {
-        gameLogs.shift();
-    }
-
-    localStorage.setItem("gameLogs", JSON.stringify(gameLogs));
-    console.log(`[${type}] ${message}`);
 }
 
 function verifyPlayerPassword(playerName, password) {
@@ -124,6 +123,11 @@ function autoClosePreviousDay(dayKey) {
         actual: actual,
         difference: smallestDifference
     };
+
+    logEvent(
+        "WINNER",
+        winner.name + " won " + dayKey + " with guess " + winner.guess + " and actual " + actual
+    );
 }
 
 function checkForNewDay() {
@@ -380,6 +384,8 @@ function addClick() {
     checkForNewDay();
 
     dailyClicks[currentDayKey]++;
+    logEvent("CLICK", "Pot clicked. Total clicks: " + dailyClicks[currentDayKey]);
+
     saveData();
     updateDisplay();
 
@@ -417,6 +423,8 @@ function reportMisclicks() {
     }
 
     dailyClicks[currentDayKey] -= misclicks;
+    logEvent("MISCLICK", misclicks + " misclick(s) removed from " + currentDayKey);
+
     saveData();
     updateDisplay();
 
@@ -463,6 +471,7 @@ function saveGuess() {
         }
 
         setPlayerPassword(name, newPassword);
+        logEvent("PASSWORD", name + " created their password");
         alert("Password created for " + name + ".");
     } else {
         if (!verifyPlayerPassword(name, password)) {
@@ -475,6 +484,8 @@ function saveGuess() {
         name: name,
         guess: guess
     });
+
+    logEvent("GUESS", name + " guessed " + guess + " for " + currentDayKey);
 
     guessInput.value = "";
     passwordInput.value = "";
@@ -505,6 +516,8 @@ function requestPasswordChange() {
         }
 
         setPlayerPassword(name, newPassword);
+        logEvent("PASSWORD", name + " created their password");
+
         passwordInput.value = "";
         newPasswordInput.value = "";
         alert("Password created for " + name + ".");
@@ -522,6 +535,7 @@ function requestPasswordChange() {
     }
 
     setPlayerPassword(name, newPassword);
+    logEvent("PASSWORD", name + " changed their password");
 
     passwordInput.value = "";
     newPasswordInput.value = "";
@@ -557,6 +571,7 @@ function adminResetPlayerPassword() {
 
     delete playerPasswords[name];
     savePasswords();
+    logEvent("ADMIN", "Admin reset password for " + name);
 
     passwordInput.value = "";
     newPasswordInput.value = "";
