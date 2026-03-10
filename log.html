@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Logs - UHH Terraria Click Guess Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="sky">
+        <div class="sun"></div>
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+    </div>
+
+    <div class="game-wrapper">
+
+        <header class="title-box">
+            <h1>ADMIN LOG VIEWER</h1>
+            <p class="subtitle">Hidden logs for the UHH pot system</p>
+
+            <div class="hamburger-menu">
+                <button type="button" class="menu-button" onclick="toggleMenu()">☰ Menu</button>
+
+                <div class="menu-dropdown" id="menuDropdown">
+                    <a href="index.html">Back to Game</a>
+                    <a href="guide.html">How to Play</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="box">
+            <h2>Admin Access</h2>
+            <input type="password" id="adminLogPassword" placeholder="Enter admin code">
+            <button type="button" onclick="unlockLogs()">Unlock Logs</button>
+        </section>
+
+        <section class="box" id="logPanel" style="display: none;">
+            <h2>Stored Logs</h2>
+
+            <div class="log-controls">
+                <button type="button" onclick="renderLogs()">Refresh Logs</button>
+                <button type="button" onclick="downloadLogs()">Download Logs</button>
+                <button type="button" onclick="clearLogsWithAdmin()">Clear Logs</button>
+            </div>
+
+            <div class="log-summary" id="logSummary"></div>
+
+            <div class="log-table-wrap">
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <div class="ground">
+        <div class="grass-line"></div>
+        <div class="dirt-line"></div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-torch">🔥</div>
+        <p>
+            Built by the village creators:
+            <strong>Kgothatso</strong>
+            <span class="footer-crown">👑</span>
+            &
+            <strong>Nickeel</strong>
+            <span class="footer-crown">👑</span>
+        </p>
+        <div class="footer-slime">🟦</div>
+        <div class="footer-torch">🔥</div>
+    </footer>
+
+    <script>
+        const ADMIN_CODE = "UHH2026RESET";
+
+        function toggleMenu() {
+            const menu = document.getElementById("menuDropdown");
+            if (menu) {
+                menu.classList.toggle("show");
+            }
+        }
+
+        document.addEventListener("click", function (event) {
+            const menu = document.getElementById("menuDropdown");
+            const button = document.querySelector(".menu-button");
+
+            if (!menu || !button) return;
+
+            if (!menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.remove("show");
+            }
+        });
+
+        function getLogs() {
+            return JSON.parse(localStorage.getItem("gameLogs")) || [];
+        }
+
+        function unlockLogs() {
+            const password = document.getElementById("adminLogPassword").value.trim();
+
+            if (password !== ADMIN_CODE) {
+                alert("Wrong admin code.");
+                return;
+            }
+
+            document.getElementById("logPanel").style.display = "block";
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const logs = getLogs();
+            const body = document.getElementById("logTableBody");
+            const summary = document.getElementById("logSummary");
+
+            body.innerHTML = "";
+
+            if (logs.length === 0) {
+                body.innerHTML = '<tr><td colspan="3">No logs found.</td></tr>';
+                summary.innerHTML = "<p><strong>Total Logs:</strong> 0</p>";
+                return;
+            }
+
+            const counts = {};
+            logs.forEach(log => {
+                counts[log.type] = (counts[log.type] || 0) + 1;
+            });
+
+            summary.innerHTML = `
+                <p><strong>Total Logs:</strong> ${logs.length}</p>
+                <p><strong>Clicks:</strong> ${counts.CLICK || 0}</p>
+                <p><strong>Guesses:</strong> ${counts.GUESS || 0}</p>
+                <p><strong>Misclicks:</strong> ${counts.MISCLICK || 0}</p>
+                <p><strong>Passwords:</strong> ${counts.PASSWORD || 0}</p>
+                <p><strong>Admin:</strong> ${counts.ADMIN || 0}</p>
+                <p><strong>Winners:</strong> ${counts.WINNER || 0}</p>
+            `;
+
+            logs.slice().reverse().forEach(log => {
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${log.time}</td>
+                    <td>${log.type}</td>
+                    <td>${log.message}</td>
+                `;
+
+                body.appendChild(row);
+            });
+        }
+
+        function clearLogsWithAdmin() {
+            const password = prompt("Enter admin code to clear logs:");
+
+            if (password !== ADMIN_CODE) {
+                if (password !== null) {
+                    alert("Wrong admin code.");
+                }
+                return;
+            }
+
+            const confirmClear = confirm("Clear all stored logs?");
+            if (!confirmClear) return;
+
+            localStorage.removeItem("gameLogs");
+            renderLogs();
+            alert("Logs cleared.");
+        }
+
+        function downloadLogs() {
+            const logs = getLogs();
+
+            const blob = new Blob([JSON.stringify(logs, null, 2)], {
+                type: "application/json"
+            });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+
+            a.href = url;
+            a.download = "uhh-pot-logs.json";
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
